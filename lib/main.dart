@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:validation_form_bloc/bloc.dart';
-import 'package:validation_form_bloc/model.dart';
+import 'package:swagger/api.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,10 +25,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _api = Api();
+  final _api = UserJwtControllerApi();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Bloc _bloc;
-  StreamSubscription<Response> _subscription;
+  StreamSubscription<JWTToken> _subscription;
 
   @override
   void initState() {
@@ -37,19 +37,17 @@ class _LoginPageState extends State<LoginPage> {
     _subscription = _bloc.results.listen(_handleResponse);
   }
 
-  _handleResponse(Response response) {
-    if (response is SuccessResponse) {
+  _handleResponse(JWTToken token) {
+    if (token != null) {
       _showSnackBar('Sign in successfully').closed.then((_) {
         final route = MaterialPageRoute(
-          builder: (BuildContext context) => HomePage(response.token),
+          builder: (BuildContext context) => HomePage(token.id_token),
         );
         Navigator.push(context, route);
       });
       return;
     }
-    if (response is ErrorResponse) {
-      _showSnackBar(response.error.toString());
-    }
+    _showSnackBar("Failed to authorize!");
   }
 
   @override

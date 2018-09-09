@@ -10,6 +10,10 @@ dependencies:
   cupertino_icons: ^0.1.2
   rxdart: ^0.18.1
 
+  swagger:
+    path:
+      swagger
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

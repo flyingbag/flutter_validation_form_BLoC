@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:validation_form_bloc/model.dart';
+import 'package:swagger/api.dart';
 
 bool _isValidPassword(String password) {
   return password.length >= 6;
@@ -56,23 +56,23 @@ class Bloc {
 
   Stream<bool> get isLoading => _loadingController.stream.distinct();
 
-  Stream<Response> results;
+  Stream<JWTToken> results;
 
   Stream<bool> validSubmit;
 
-  final Api api;
+  final UserJwtControllerApi api;
 
   Bloc(this.api) : assert(api != null) {
     final credentialStream = Observable.combineLatest2(
       emailStream,
       passwordStream,
-      (email, password) => Credential(email: email, password: password),
+      (email, password) => LoginVM.fromJson({'username': email, 'password': password}),
     );
     results = Observable(_loginController.stream)
-        .withLatestFrom<Credential, Credential>(credentialStream, (_, e) => e)
+        .withLatestFrom<LoginVM, LoginVM>(credentialStream, (_, e) => e)
         .flatMap(
           (credential) => Observable
-              .fromFuture(api.login(credential))
+              .fromFuture(api.authorizeUsingPOST(credential))
               .doOnListen(() => _loadingController.add(true))
               .doOnEach((_) => _loadingController.add(false)),
         );
